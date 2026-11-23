@@ -29,7 +29,8 @@ def build_flows(routes, observations, year):
     extra = set(by_id) - known
     if extra:
         raise ValueError(f"Unknown route IDs: {', '.join(sorted(extra))}")
-    result["metadata"] = {"kind": "corridors", "period": int(year), "source": "Schematic maritime corridors; optional independently sourced tonnages", "geometry_accuracy": "illustrative, not AIS or navigational", "note": "Route-level weight estimates must refer to this precise direction and period; no substitution of national exports or chokepoint totals."}
+    method = "searoute_network" if all(f["properties"].get("geometry_method") == "searoute_network" for f in result["features"]) else "schematic"
+    result["metadata"] = {"kind": "corridors", "period": int(year), "source": "SeaRoute maritime graph; optional independently sourced tonnages" if method == "searoute_network" else "Schematic maritime corridors; optional independently sourced tonnages", "geometry_accuracy": "sea_network_unverified" if method == "searoute_network" else "illustrative", "note": "Sea-network routes are not AIS tracks or navigational routes; weights must refer to this exact origin, destination, and period."}
     return result
 
 

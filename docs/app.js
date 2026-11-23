@@ -7,7 +7,7 @@ const q = (selector) => document.querySelector(selector);
 const number = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 });
 const views = {
   density: { title: 'Плотность AIS', description: 'Число уникальных судно-часов в пространственной ячейке. Это не масса груза.', count: 'Ячеек', heading: 'ПЛОТНОСТЬ СУДОХОДСТВА', detail: 'AIS-наблюдения / плотность' },
-  flows: { title: 'Морские грузовые коридоры', description: 'Тоннаж указывается только при наличии проверенного источника для направления и года.', count: 'Маршрутов', heading: 'ГРУЗОВЫЕ КОРИДОРЫ', detail: 'Схематичные трассы / подтверждённый тоннаж' },
+  flows: { title: 'Морские грузовые коридоры', description: 'Тоннаж указывается только при наличии проверенного источника для направления и года.', count: 'Маршрутов', heading: 'ГРУЗОВЫЕ КОРИДОРЫ', detail: 'Расчётные трассы / проверенный тоннаж' },
   vessels: { title: 'Позиции отдельных судов', description: 'Последняя принятая позиция AISStream. Данные не являются гарантированно полными или непрерывными.', count: 'Судов', heading: 'ДВИЖЕНИЕ СУДОВ', detail: 'AISStream / локальный приёмник' }
 };
 const state = { view: 'density', local: false, density: EMPTY(), flows: EMPTY(), vessels: EMPTY(), densityMeta: { kind: 'geojson' }, mapReady: false };
@@ -72,7 +72,7 @@ function updatePanel() {
     const confirmed = data.features.filter(f => f.properties.cargo_tonnes != null).length;
     setText('#metric-period', String(state.flows.metadata?.period || '—'));
     setText('#data-status', `Маршрутов: ${data.features.length}; с данными о тоннаже: ${confirmed}. Линии без тоннажа - только ориентиры.`);
-    setText('#source-note', 'Геометрия схематичная, по опорным точкам; не является фактической AIS-траекторией.');
+    setText('#source-note', state.flows.metadata?.geometry_accuracy === 'sea_network_unverified' ? 'Линии рассчитаны по морской сети SeaRoute; не являются подтверждёнными AIS-траекториями.' : 'Геометрия схематичная; не является фактической AIS-траекторией.');
   } else {
     const stamps = data.features.map(f => Date.parse(f.properties.timestamp_utc)).filter(Number.isFinite);
     const latest = stamps.length ? new Date(Math.max(...stamps)).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC' : 'нет данных';
@@ -136,7 +136,7 @@ function addLayers() {
     'circle-stroke-color': '#fff', 'circle-stroke-width': 1.3, 'circle-opacity': 0.88
   }});
   attachPopup('density-fill', p => `<div class="popup-title">Плотность судоходства</div>${row('Судно-часы', number.format(p.ship_hours))}${row('Судов по MMSI', number.format(p.vessels))}${row('Позиционных сообщений', number.format(p.positions))}`);
-  const flowPopup = p => `<div class="popup-title">${escape(p.name_ru)}</div>${row('Груз', p.cargo_ru)}${row('Через', p.via)}${row('Год', p.year)}${row('Тоннаж, т', p.cargo_tonnes === null || p.cargo_tonnes === 'null' ? 'Нет подтверждённых данных' : number.format(Number(p.cargo_tonnes)))}${row('Траектория', 'Схематичная')}${p.source_url && p.source_url !== 'null' ? row('Источник', p.source_url) : ''}`;
+  const flowPopup = p => `<div class="popup-title">${escape(p.name_ru)}</div>${row('Груз', p.cargo_ru)}${row('Через', p.via)}${row('Год', p.year)}${row('Тоннаж, т', p.cargo_tonnes === null || p.cargo_tonnes === 'null' ? 'Нет подтверждённых данных' : number.format(Number(p.cargo_tonnes)))}${row('Траектория', p.geometry_method === 'searoute_network' ? 'Расчёт по морской сети' : 'Схематичная')}${p.source_url && p.source_url !== 'null' ? row('Источник', p.source_url) : ''}`;
   attachPopup('flows-known', flowPopup);
   attachPopup('flows-unknown', flowPopup);
   attachPopup('vessel-points', p => `<div class="popup-title">${escape(p.name)}</div>${row('MMSI', p.mmsi)}${row('Скорость, уз', p.speed_knots)}${row('Курс, °', p.course_degrees)}${row('Приём UTC', p.timestamp_utc)}${row('Источник', p.source)}`);

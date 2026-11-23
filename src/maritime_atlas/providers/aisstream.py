@@ -51,7 +51,7 @@ async def collect(bbox, minutes, output, observations_path):
         raise ValueError("bbox format: SOUTH WEST NORTH EAST, no antimeridian crossing")
     if minutes <= 0:
         raise ValueError("minutes must be positive")
-    subscription = {"APIKey": api_key, "BoundingBoxes": [[[south, west], [north, east]]], "FilterMessageTypes": ["PositionReport", "StandardClassBPositionReport", "ExtendedClassBPositionReport"]}
+    subscription = {"APIKey": api_key, "BoundingBoxes": [[[north, west], [south, east]]], "FilterMessageTypes": ["PositionReport", "StandardClassBPositionReport", "ExtendedClassBPositionReport"]}
     path = Path(observations_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     existed = path.exists() and path.stat().st_size > 0

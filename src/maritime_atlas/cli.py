@@ -33,6 +33,10 @@ def main():
     flows.add_argument("--output", default="docs/data/flows.geojson")
     flows.add_argument("--year", type=int, default=2025)
 
+    routes = commands.add_parser("rebuild-routes", help="Recalculate corridors along a maritime graph")
+    routes.add_argument("--input", default="data/corridors.geojson")
+    routes.add_argument("--output", default="data/corridors.geojson")
+
     raster = commands.add_parser("density-raster", help="Convert external GeoTIFF to an optimized web overlay")
     raster.add_argument("--input", required=True)
     raster.add_argument("--output", default="docs/data/density.png")
@@ -49,6 +53,9 @@ def main():
         print(json.dumps(asyncio.run(collect(args.bbox, args.minutes, args.output, args.observations)), ensure_ascii=False))
     elif args.command == "build-density":
         print(f"Density cells: {density_from_csv(args.csv, args.output, args.cell_size)}")
+    elif args.command == "rebuild-routes":
+        from maritime_atlas.processing.routing import rebuild_routes
+        print(f"Sea-network routes: {rebuild_routes(args.input, args.output)}")
     elif args.command == "build-flows":
         print(f"Verified routes: {flows_from_csv(args.routes, args.weights, args.output, args.year)}")
     elif args.command == "density-raster":
