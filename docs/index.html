@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#132d42">
+  <meta name="description" content="Интерактивный морской атлас: плотность судоходства AIS, мировые грузовые коридоры и отслеживание судов. Экспорт GeoJSON, CSV и PNG.">
+  <meta name="robots" content="index,follow">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Морской атлас — плотность судоходства, грузопотоки и суда">
+  <meta property="og:description" content="Открытый интерактивный атлас мирового судоходства с воспроизводимыми геоданными.">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Морской атлас | Плотность судоходства, грузопотоки, AIS</title>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Морской атлас","description":"Открытый картографический интерфейс для анализа морских грузопотоков и AIS","applicationCategory":"DataVisualizationApplication","operatingSystem":"Web","inLanguage":"ru","isAccessibleForFree":true}</script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-logo" aria-hidden="true">≋</span><span>MARITIME <strong>ATLAS</strong></span><span class="version">v0.1</span></div>
+    <div class="topbar-right"><span class="status-dot"></span><span id="connection-status">Загрузка источников</span></div>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar" aria-label="Управление морской картой">
+      <div class="eyebrow">МОРСКАЯ АНАЛИТИКА</div>
+      <h1>Мировое судоходство</h1>
+      <p class="intro">Три самостоятельных слоя с разными показателями и источниками данных.</p>
+      <div class="tabs" role="tablist" aria-label="Вид карты">
+        <button class="tab active" data-view="density" role="tab" aria-selected="true"><span>01</span> Плотность судоходства</button>
+        <button class="tab" data-view="flows" role="tab" aria-selected="false"><span>02</span> Грузопотоки</button>
+        <button class="tab" data-view="vessels" role="tab" aria-selected="false"><span>03</span> Движение судов</button>
+      </div>
+      <section class="info-panel" aria-live="polite">
+        <div class="section-caption">ПОКАЗАТЕЛЬ</div>
+        <h2 id="metric-title">Плотность AIS</h2>
+        <p id="metric-info">Число уникальных судно-часов в пространственной ячейке.</p>
+        <div class="metric-grid">
+          <div class="metric"><span id="metric-count">—</span><small id="metric-count-label">Ячеек</small></div>
+          <div class="metric"><span id="metric-period">—</span><small>Период</small></div>
+        </div>
+      </section>
+      <section class="filters" id="flow-filters" hidden>
+        <label for="cargo-filter">Категория груза</label>
+        <select id="cargo-filter">
+          <option value="all">Все категории</option>
+          <option value="dry_bulk">Сухие массовые грузы</option>
+          <option value="coal">Уголь</option>
+          <option value="energy">Энергоносители</option>
+          <option value="container">Контейнеры</option>
+          <option value="mixed">Смешанные грузы</option>
+        </select>
+        <label class="check"><input id="verified-only" type="checkbox"> Только маршруты с тоннажем</label>
+      </section>
+      <section class="filters" id="vessel-filters" hidden>
+        <label for="vessel-search">Название или MMSI</label>
+        <input id="vessel-search" type="search" placeholder="Поиск судна">
+        <p class="hint">В локальном режиме данные обновляются каждые 15 секунд при запущенном приёмнике AIS.</p>
+      </section>
+      <section class="legend-panel">
+        <div class="section-caption">ОБОЗНАЧЕНИЯ</div>
+        <div id="legend"></div>
+      </section>
+      <section class="source-panel">
+        <div class="section-caption">ДАННЫЕ И КАЧЕСТВО</div>
+        <p id="data-status" role="status">Загрузка...</p>
+        <p class="source-note" id="source-note">Основано на подключённом источнике.</p>
+      </section>
+      <div class="export-panel">
+        <div class="section-caption">ЭКСПОРТ ТЕКУЩЕГО СЛОЯ</div>
+        <div class="export-buttons"><button id="download-geojson">GeoJSON</button><button id="download-csv">CSV</button><button id="download-png">PNG</button></div>
+      </div>
+      <footer class="sidebar-footer"><a href="https://github.com/simplifaisoul/osiris" target="_blank" rel="noopener noreferrer">Архитектурный ориентир: OSIRIS</a><span>MapLibre GL / Python / GeoJSON</span></footer>
+    </aside>
+    <section class="map-area" aria-label="Интерактивная морская карта">
+      <div id="map" role="application" aria-label="Карта морского судоходства"></div>
+      <div class="map-overlay"><span id="map-heading">ПЛОТНОСТЬ СУДОХОДСТВА</span><span class="overlay-divider"></span><span id="map-subheading">Реальные AIS / загружаемый слой</span></div>
+      <div class="map-bottom"><span>Показатели разных слоёв не следует суммировать</span><span id="map-message">Ожидание данных</span></div>
+    </section>
+  </main>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
