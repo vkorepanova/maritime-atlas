@@ -1,4 +1,4 @@
-import maplibregl from 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.19.0/dist/maplibre-gl.mjs';
 
 const BASE = new URL('./', import.meta.url);
 const DATA = new URL('./data/', BASE);
